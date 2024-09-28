@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Media;
 
 namespace TextRpg
 {
@@ -12,10 +13,9 @@ namespace TextRpg
     {
         static void Main(string[] args)
         {
-            Game game = new Game();
             while (true)
             {
-                game.Start();
+                Game.GetInstance().Start(); ;
             }
 
         }

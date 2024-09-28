@@ -122,5 +122,72 @@ namespace TextRpg
             }
             return -1;
         }
+
+        public void ShowInven(Player _player)
+        {
+            Console.WriteLine("[아이템 목록]");
+            PrintIven();
+
+            Console.WriteLine("1. 장착관리");
+            Console.WriteLine("0. 나가기");
+            Console.WriteLine("원하시는 행동을 입력해주세요");
+
+            string input = Console.ReadLine();
+
+            switch (input)
+            {
+                case "1":
+                    EquipManager(_player);
+                    break;
+
+                case "0":
+                    Game.GetInstance()._mode = GameMode.Town;
+                    break;
+            }
+            Console.WriteLine();
+        }
+
+        public void EquipManager(Player _player)
+        {
+            Console.WriteLine("보유 중인 아이템을 관리할 수 있습니다");
+            Console.WriteLine("아이템을 장착하거나 해제하려면 해당 번호를 입력하세요");
+            Console.WriteLine();
+
+            Console.WriteLine("[아이템 목록]");
+
+            //아이템 보여주기
+            for (int i = 0; i < _items.Count; i++)
+            {
+                if (_items[i] != null)
+                {
+                    Console.Write($"{i + 1}. ");
+                    _items[i].PrintInfo();
+                    Console.WriteLine();
+                }
+            }
+
+            Console.WriteLine("0. 나가기");
+            Console.WriteLine("원하시는 행동을 입력해주세요");
+            string input = Console.ReadLine();
+
+            //나가기
+            if (input == "0")
+            {
+                return;
+            }
+
+            //해당번오의 아이템을 장착 할 수 있는지 없는지 체크
+            int number = int.Parse(input) - 1;
+            if (_items[number]._Isequip)
+            {
+                _player.Unequip(_items[number]);
+            }
+            else
+            {
+                _player.Equip(_items[number]);
+            }
+
+        }
+
     }
 }

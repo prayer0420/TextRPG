@@ -133,6 +133,31 @@ namespace TextRpg
             base.LevelUp();
         }
 
+        public void ShowInfo()
+        {
+            Console.WriteLine($"레벨 : {_level}");
+            Console.WriteLine($"직업: {GetPlayerType()}");
+            Console.WriteLine($"공격력 : {_atk + _itemAtk}  (+{_itemAtk})");
+            Console.WriteLine($"방어력 : {_def + _itemDef}  (+{_itemDef})");
+            Console.WriteLine($"체력 : {GetHp()}");
+            Console.WriteLine($"골드 : {_gold}");
+
+            Console.WriteLine();
+            Console.WriteLine();
+
+            Console.WriteLine("0. 나가기");
+
+            Console.WriteLine();
+            Console.WriteLine();
+
+            Console.WriteLine("원하시는 행동을 입력해주세요.");
+            string input = Console.ReadLine();
+            if (input == "0")
+            {
+                return;
+            }
+            Console.WriteLine();
+        }
     }
 
     class Knight : Player
@@ -161,8 +186,7 @@ namespace TextRpg
     {
         public Archor() : base(PlayerType.Archer)
         {
-            //level, atk, def, hp
-            //SetInfo(1, 12, 7, 75);
+        
         }
         public override void LevelUp()
         {
@@ -177,8 +201,7 @@ namespace TextRpg
     {
         public Mage() : base(PlayerType.Mage)
         {
-            //level, atk, def, hp
-            //SetInfo(1, 15, 5, 60);
+           
         }
         public override void LevelUp()
         {

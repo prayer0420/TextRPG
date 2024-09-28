@@ -21,20 +21,29 @@ namespace TextRpg
 
     class Game
     {
+
         public GameMode _mode = GameMode.Lobby;
         public Inventory _inventory = Inventory.GetInstance();
         public Shop _shop = new Shop();
         public Player _player = null;
         public Monster _monster = null;
         public GameData _gameData;
+        public string PlayerName;
         public static Random _globalRandom = new Random();
-        public static int DungeonClearCount = 0;
-        public static int RequireDungeonClearCount = 1;
+
+        private static Game _instance = new Game();
+
+        public static Game GetInstance()
+        {
+            if(_instance == null)   
+                return _instance;
+            return _instance;
+        }
 
         //게임데이터 저장
         public void SaveGameData()
         {
-            GameData gameData = new GameData(_player, _inventory, _shop, _mode, DungeonClearCount, RequireDungeonClearCount);
+            GameData gameData = new GameData(_player, _inventory, _shop, _mode);
             string jsonData = JsonConvert.SerializeObject(gameData, Formatting.Indented,
                 new JsonSerializerSettings
                 {
@@ -65,8 +74,6 @@ namespace TextRpg
 
                 _shop = gameData.Shop;
                 _mode = gameData.Mode;
-                DungeonClearCount = gameData.DungeonClearCount;
-                RequireDungeonClearCount = gameData.RequireDungeonClearCount;
 
                 Console.WriteLine("게임 데이터를 불러왔습니다.");
                 return true;
@@ -84,14 +91,18 @@ namespace TextRpg
             if (!LoadGameData())
             {
                 _mode = GameMode.Lobby;
-                Process();
+                Console.WriteLine("스파르타 던전에 오신 여러분 환영합니다.");
+                Console.Write("원하시는 이름을 설정해주세요.\n>> ");
+                PlayerName = Console.ReadLine();
+
+                MainProcess(PlayerName);
 
             }
 
             while (true)
             {
                 _mode |= GameMode.Town;
-                Process();
+                MainProcess(PlayerName);
             }
         }
 
@@ -104,12 +115,12 @@ namespace TextRpg
             Environment.Exit(0);
         }
 
-        public void Process()
+        public void MainProcess(string PlayerName)
         {
             switch (_mode)
             {
                 case GameMode.Lobby:
-                    ProcessLobby();
+                    ProcessLobby(PlayerName);
                     break;
                 case GameMode.Town:
                     ProcessTown();
@@ -121,9 +132,9 @@ namespace TextRpg
         }
 
 
-        public void ProcessLobby()
+        public void ProcessLobby(string playerName)
         {
-            Console.WriteLine("세계가 당신을 기다립니다. 직업을 선택하세요");
+            Console.WriteLine($"{playerName}님! 세계가 당신을 기다립니다. 직업을 선택하세요");
             Console.WriteLine("[1] 기사");
             Console.WriteLine("[2] 궁수");
             Console.WriteLine("[3] 법사");
@@ -138,10 +149,12 @@ namespace TextRpg
                 case "2":
                     _player = new Archor();
                     _mode = GameMode.Town;
+                    _player.Initialize();
                     break;
                 case "3":
                     _player = new Mage();
                     _mode = GameMode.Town;
+                    _player.Initialize();
                     break;
             }
         }
@@ -155,7 +168,7 @@ namespace TextRpg
             Console.WriteLine("[2] 인벤토리");
             Console.WriteLine("[3] 상점");
             Console.WriteLine("[4] 던전 입장");
-            Console.WriteLine("[5] 휴식하기");
+            Console.WriteLine("[5] 퀘스트 의뢰소 가기");
             Console.WriteLine("[6] 저장하기");
             Console.WriteLine("[7] 나가기");
 
@@ -164,11 +177,11 @@ namespace TextRpg
             {
                 //상태보기
                 case "1":
-                    ShowInfo(_player);
+                    _player.ShowInfo();
                     break;
                 //인벤토리
                 case "2":
-                    ShowInven();
+                    Inventory.GetInstance().ShowInven(_player);
                     break;
                 //상점
                 case "3":
@@ -178,9 +191,9 @@ namespace TextRpg
                 case "4":
                     _mode = GameMode.Dungeon;
                     break;
-                //휴식하기
+                //퀘스트 의뢰소 가기
                 case "5":
-                    ProcessRest(_player);
+                    ProcessQuest(_player);
                     break;
                 case "6":
                     SaveGameData();
@@ -192,127 +205,35 @@ namespace TextRpg
             }
         }
 
-        public void ShowInfo(Player _player)
+        public void ProcessQuest(Player player)
         {
-            Console.WriteLine($"레벨 : {_player._level}");
-            Console.WriteLine($"직업: {_player.GetPlayerType()}");
-            Console.WriteLine($"공격력 : {_player._atk + _player._itemAtk}  (+{_player._itemAtk})");
-            Console.WriteLine($"방어력 : {_player._def + _player._itemDef}  (+{_player._itemDef})");
-            Console.WriteLine($"체력 : {_player.GetHp()}");
-            Console.WriteLine($"골드 : {_player._gold}");
+            Console.WriteLine("어서오세요. 여기는 퀘스트 의뢰소 입니다.\n 무엇을 하시겠나요?");
+            Console.WriteLine("1. 진행 가능한 퀘스트 보기");
+            Console.WriteLine("2. 진행 중인 퀘스트 보기");
+            Console.WriteLine("3. 퀘스트 완료 하기");
 
-            Console.WriteLine();
-            Console.WriteLine();
+            Console.Write(">> ");
+            int choice = int.Parse(Console.ReadLine());
 
-            Console.WriteLine("0. 나가기");
-
-            Console.WriteLine();
-            Console.WriteLine();
-
-            Console.WriteLine("원하시는 행동을 입력해주세요.");
-            string input = Console.ReadLine();
-            if (input == "0")
+            switch (choice)
             {
-                _mode = GameMode.Town;
-            }
-            Console.WriteLine();
-        }
-
-        public void ShowInven()
-        {
-            //Weapon weapon = new Weapon();
-            //inventory.AddItem(weapon);
-
-            Console.WriteLine("[아이템 목록]");
-            _inventory.PrintIven();
-
-            Console.WriteLine("1. 장착관리");
-            Console.WriteLine("0. 나가기");
-            Console.WriteLine("원하시는 행동을 입력해주세요");
-
-            string input = Console.ReadLine();
-
-            switch (input)
-            {
-                case "1":
-                    EquipManager();
+                case 1:
+                    QuestManager.GetInstance().ShowAvailableQuests(player);
+                    Console.WriteLine("퀘스트를 선택하여 상세정보를 보거나 수락하세요:");
+                    int questIndex = int.Parse(Console.ReadLine());
+                    QuestManager.GetInstance().SelectQuest(questIndex, player);
                     break;
-
-                case "0":
-                    _mode = GameMode.Town;
+                case 2:
+                    QuestManager.GetInstance().ShowActiveQuests();
+                    break;
+                case 3:
+                    QuestManager.GetInstance().ShowActiveQuests();
+                    Console.WriteLine("완료할 퀘스트를 선택하세요:");
+                    int completeIndex = int.Parse(Console.ReadLine());
+                    QuestManager.GetInstance().CompleteQuest(completeIndex, player);
                     break;
             }
-            Console.WriteLine();
         }
-
-        public void EquipManager()
-        {
-            Console.WriteLine("보유 중인 아이템을 관리할 수 있습니다");
-            Console.WriteLine("아이템을 장착하거나 해제하려면 해당 번호를 입력하세요");
-            Console.WriteLine();
-
-            Console.WriteLine("[아이템 목록]");
-
-            //아이템 보여주기
-            for (int i = 0; i < _inventory._items.Count; i++)
-            {
-                if (_inventory._items[i] != null)
-                {
-                    Console.Write($"{i + 1}. ");
-                    _inventory._items[i].PrintInfo();
-                    Console.WriteLine();
-                }
-            }
-
-            Console.WriteLine("0. 나가기");
-            Console.WriteLine("원하시는 행동을 입력해주세요");
-            string input = Console.ReadLine();
-
-            //나가기
-            if (input == "0")
-            {
-                return;
-            }
-
-            //해당번오의 아이템을 장착 할 수 있는지 없는지 체크
-            int number = int.Parse(input) - 1;
-            if (_inventory._items[number]._Isequip)
-            {
-                _player.Unequip(_inventory._items[number]);
-            }
-            else
-            {
-                _player.Equip(_inventory._items[number]);
-            }
-
-        }
-
-        public void ProcessRest(Player _player)
-        {
-            Console.WriteLine($"500 G 를 내면 체력을 회복할 수 있습니다. 보유 골드 : {_player._gold} ");
-
-            Console.WriteLine();
-
-            Console.WriteLine("1. 휴식하기");
-            Console.WriteLine("0. 나가기\n");
-            Console.WriteLine("원하시는 행동을 입력해주세요.");
-            string input = Console.ReadLine();
-            if (input == "0")
-            {
-                return;
-            }
-            else if (input == "1")
-            {
-                // 돈 감소
-                _player._gold -= 500;
-                // 체력 회복
-                _player.RecoveryHp(100);
-
-                Console.WriteLine("체력이 회복되었습니다");
-                Console.WriteLine("마을로 이동합니다");
-            }
-        }
-
         
         public void ProcessDungeon(Player _player)
         {
@@ -336,13 +257,13 @@ namespace TextRpg
             switch (input)
             {
                 case "1":
-                    EasyDungeon(_player);
+                    Dungeon.GetInstance().EasyDungeon(_player);
                     break;
                 case "2":
-                    NormalDungeon(_player);
+                    Dungeon.GetInstance().NormalDungeon(_player);
                     break;
                 case "3":
-                    HardDungeon(_player);
+                    Dungeon.GetInstance().HardDungeon(_player);
                     break;
                 case "0":
                     _mode = GameMode.Town;
@@ -350,307 +271,41 @@ namespace TextRpg
             }
         }
 
-        public void EasyDungeon(Player _player)
-        {
-            const int REQUIRE_DEF = 5;
-            const int REWARD = 1000;
-
-            //권장 방어력보다 낮으면
-            if (_player._def < REQUIRE_DEF)
-            {
-                //40%확률로 실패
-                int rand = _globalRandom.Next(0, 10);
-                if (rand < 4)
-                {
-                    Console.WriteLine("[쉬운 던전공략 실패!]");
-                    _player.OnDamaged((int)(_player.GetHp() * 0.5f));
-                    Console.WriteLine($"체력이 {_player.GetHp()}으로 깎였습니다");
-
-                    //체력이 0이하라면 자동으로 마을로 가기
-                    if (_player.GetHp() <= 0)
-                    {
-                        _mode = GameMode.Town;
-                        Console.WriteLine("HP가 0이므로 마을로 이동합니다");
-                        return;
-                    }
-                }
-                //60%확률로 성공
-                else
-                {
-                    Console.WriteLine("[쉬운 던전공략 성공!]");
-
-                    Console.WriteLine("[탐험결과]");
-                    int rand2 = _globalRandom.Next(20, 36);
-                    Console.Write($"체력 {_player.GetHp()} -> ");
-                    _player.OnDamaged(rand2 - (REQUIRE_DEF - _player._def));
-                    Console.WriteLine($"{_player.GetHp()}");
-
-                    rand2 = _globalRandom.Next(_player._atk, _player._atk * 2);
-                    Console.Write($"Gold {_player._gold} -> ");
-                    _player._gold += REWARD + rand2;
-                    Console.WriteLine($"{_player._gold}");
-
-                    //클리어 횟수 추가
-                    DungeonClearCount++;
-                    CheckLevelUp(_player);
-
-                    //체력이 0이하라면 자동으로 마을로 가기
-                    if (_player.GetHp() <= 0)
-                    {
-                        _mode = GameMode.Town;
-                        Console.WriteLine("HP가 0이므로 마을로 이동합니다");
-                        return;
-                    }
-
-                    Console.WriteLine("0.나가기\n");
-
-                    Console.WriteLine("원하시는 행동을 입력해주세요");
-                    string input = Console.ReadLine();
-                    if (input == "0")
-                        return;
-
-                   
-                }
-            }
-            //권장 방어력보다 높으면 무조건 성공
-            else
-            {
-                Console.WriteLine("[쉬운 던전공략 성공!]");
-
-                Console.WriteLine("[탐험결과]");
-                int rand2 = _globalRandom.Next(20, 36);
-                Console.Write($"체력 {_player.GetHp()} -> ");
-                _player.OnDamaged(rand2 - (_player._def- REQUIRE_DEF));
-                Console.WriteLine($"{_player.GetHp()}");
-
-                rand2 = _globalRandom.Next(_player._atk, _player._atk * 2);
-                Console.Write($"Gold {_player._gold} -> ");
-                _player._gold += REWARD + rand2;
-                Console.WriteLine($"{_player._gold}");
-
-                //클리어 횟수 추가
-                DungeonClearCount++;
-                CheckLevelUp(_player);
-
-                //체력이 0이하라면 자동으로 마을로 가기
-                if (_player.GetHp() <= 0)
-                {
-                    _mode = GameMode.Town;
-                    Console.WriteLine("HP가 0이므로 마을로 이동합니다");
-                    return;
-                }
-                Console.WriteLine("0.나가기\n");
-
-                Console.WriteLine("원하시는 행동을 입력해주세요");
-                string input = Console.ReadLine();
-                if (input == "0")
-                    return;
-            }
-        }
-
-        public void NormalDungeon(Player _player)
-        {
-            const int REQUIRE_DEF = 11;
-            const int REWARD = 1700;
-
-            //권장 방어력보다 낮으면
-            if (_player._def < REQUIRE_DEF)
-            {
-                //60%확률로 실패
-                int rand = _globalRandom.Next(0, 10);
-                if (rand < 6)
-                {
-                    Console.WriteLine("[일반 던전공략 실패!]");
-                    _player.OnDamaged((int)(_player.GetHp() * 0.5f));
-                    Console.WriteLine($"체력이 {_player.GetHp()}으로 깎였습니다");
-
-                    //체력이 0이하라면 자동으로 마을로 가기
-                    if (_player.GetHp() <= 0)
-                    {
-                        _mode = GameMode.Town;
-                        Console.WriteLine("HP가 0이므로 마을로 이동합니다");
-                        return;
-                    }
-                }
-                //40%확률로 성공
-                else
-                {
-                    Console.WriteLine("[일반 던전공략 성공!]");
-
-                    Console.WriteLine("[탐험결과]");
-                    int rand2 = _globalRandom.Next(20, 36);
-                    Console.Write($"체력 {_player.GetHp()} -> ");
-                    _player.OnDamaged(rand2 - (REQUIRE_DEF - _player._def));
-                    Console.WriteLine($"{_player.GetHp()}");
-
-                    rand2 = _globalRandom.Next(_player._atk, _player._atk * 2);
-                    Console.Write($"Gold {_player._gold} -> ");
-                    _player._gold += (REWARD + (REWARD * (rand2/100)) );
-                    Console.WriteLine($"{_player._gold}");
-                    //클리어 횟수 추가
-                    DungeonClearCount++;
-                    CheckLevelUp(_player);
-
-                    //체력이 0이하라면 자동으로 마을로 가기
-                    if (_player.GetHp() <= 0)
-                    {
-                        _mode = GameMode.Town;
-                        Console.WriteLine("HP가 0이므로 마을로 이동합니다");
-                        return;
-                    }
-                    Console.WriteLine("0.나가기\n");
-
-                    Console.WriteLine("원하시는 행동을 입력해주세요");
-                    string input = Console.ReadLine();
-                    if (input == "0")
-                        return;
-                }
-            }
-            //권장 방어력보다 높으면
-            else
-            {
-                Console.WriteLine("[일반 던전공략 성공!]");
-
-                Console.WriteLine("[탐험결과]");
-                int rand2 = _globalRandom.Next(20, 36);
-                Console.Write($"체력 {_player.GetHp()} -> ");
-                _player.OnDamaged(rand2 - (_player._def - REQUIRE_DEF));
-                Console.WriteLine($"{_player.GetHp()}");
-                
-                rand2 = _globalRandom.Next(_player._atk, _player._atk * 2);
-                Console.Write($"Gold {_player._gold} -> ");
-                _player._gold += (REWARD + (REWARD * (rand2 / 100)));
-                Console.WriteLine($"{_player._gold}");
-
-                //클리어 횟수 추가
-                DungeonClearCount++;
-                CheckLevelUp(_player);
-
-                //체력이 0이하라면 자동으로 마을로 가기
-                if (_player.GetHp() <= 0)
-                {
-                    _mode = GameMode.Town;
-                    Console.WriteLine("HP가 0이므로 마을로 이동합니다");
-                    return;
-                }
-
-                Console.WriteLine("0.나가기\n");
-                
-                Console.WriteLine("원하시는 행동을 입력해주세요");
-                string input = Console.ReadLine();
-                if (input == "0")
-                    return;
-            }
-        }
-
-        public void HardDungeon(Player _player)
-        {
-            const int REQUIRE_DEF = 17;
-            const int REWARD = 2000;
-
-            //권장 방어력보다 낮으면
-            if (_player._def < REQUIRE_DEF)
-            {
-                //70%확률로 실패
-                int rand = _globalRandom.Next(0, 10);
-                if (rand < 4)
-                {
-                    Console.WriteLine("[어려운 던전공략 실패!]");
-                    _player.OnDamaged((int)(_player.GetHp() * 0.5f));
-                    Console.WriteLine($"체력이 {_player.GetHp()}으로 깎였습니다");
-
-                    //체력이 0이하라면 자동으로 마을로 가기
-                    if (_player.GetHp() <= 0)
-                    {
-                        _mode = GameMode.Town;
-                        Console.WriteLine("HP가 0이므로 마을로 이동합니다");
-                        return;
-                    }
-                }
-                //30%확률로 성공
-                else
-                {
-                    Console.WriteLine("[어려운 던전공략 성공!]");
-
-                    Console.WriteLine("[탐험결과]");
-                    int rand2 = _globalRandom.Next(20, 36);
-                    Console.Write($"체력 {_player.GetHp()} -> ");
-                    _player.OnDamaged(rand2 - (REQUIRE_DEF - _player._def));
-                    Console.WriteLine($"{_player.GetHp()}");
-
-                    rand2 = _globalRandom.Next(_player._atk, _player._atk * 2);
-                    Console.Write($"Gold {_player._gold} -> ");
-                    _player._gold += (REWARD + (REWARD * (rand2 / 100)));
-                    Console.WriteLine($"{_player._gold}");
-
-
-                    //클리어 횟수 추가
-                    DungeonClearCount++;
-                    CheckLevelUp(_player);
-
-                    //체력이 0이하라면 자동으로 마을로 가기
-                    if (_player.GetHp() <= 0)
-                    {
-                        _mode = GameMode.Town;
-                        Console.WriteLine("HP가 0이므로 마을로 이동합니다");
-                        return;
-                    }
-
-                    Console.WriteLine("0.나가기\n");
-
-                    Console.WriteLine("원하시는 행동을 입력해주세요");
-                    string input = Console.ReadLine();
-                    if (input == "0")
-                        return;
-                }
-            }
-            //권장 방어력보다 높으면
-            else
-            {
-                Console.WriteLine("[어려운 던전공략 성공!]");
-
-                Console.WriteLine("[탐험결과]");
-                int rand2 = _globalRandom.Next(20, 36);
-                Console.Write($"체력 {_player.GetHp()} -> ");
-                _player.OnDamaged(rand2 - (_player._def - REQUIRE_DEF));
-                Console.WriteLine($"{_player.GetHp()}");
-
-                rand2 = _globalRandom.Next(_player._atk, _player._atk * 2);
-                Console.Write($"Gold {_player._gold} -> ");
-                _player._gold += (REWARD + (REWARD * (rand2 / 100)));
-                Console.WriteLine($"{_player._gold}");
-
-                //클리어 횟수 추가
-                DungeonClearCount++;
-                CheckLevelUp(_player);
-
-                //체력이 0이하라면 자동으로 마을로 가기
-                if (_player.GetHp() <= 0)
-                {
-                    _mode = GameMode.Town;
-                    Console.WriteLine("HP가 0이므로 마을로 이동합니다");
-                    return;
-                }
-                Console.WriteLine("0.나가기\n");
-
-                Console.WriteLine("원하시는 행동을 입력해주세요");
-                string input = Console.ReadLine();
-                if (input == "0")
-                    return;
-            }
-        }
-
 
         public void CheckLevelUp(Player _player)
         {
-            if(DungeonClearCount == RequireDungeonClearCount)
-            {
                 Console.Write($"Level Up! {_player._level} -> ");
                 _player.LevelUp();
-                RequireDungeonClearCount++;
-                DungeonClearCount = 0;
                 Console.WriteLine($"{_player._level}으로 레벨업 하였습니다! ");
             }
         }
+
+
+
+        //public void ProcessRest(Player _player)
+        //{
+        //    Console.WriteLine($"500 G 를 내면 체력을 회복할 수 있습니다. 보유 골드 : {_player._gold} ");
+
+        //    Console.WriteLine();
+
+        //    Console.WriteLine("1. 휴식하기");
+        //    Console.WriteLine("0. 나가기\n");
+        //    Console.WriteLine("원하시는 행동을 입력해주세요.");
+        //    string input = Console.ReadLine();
+        //    if (input == "0")
+        //    {
+        //        return;
+        //    }
+        //    else if (input == "1")
+        //    {
+        //        // 돈 감소
+        //        _player._gold -= 500;
+        //        // 체력 회복
+        //        _player.RecoveryHp(100);
+
+        //        Console.WriteLine("체력이 회복되었습니다");
+        //        Console.WriteLine("마을로 이동합니다");
+        //    }
+        //}
     }
-}
+

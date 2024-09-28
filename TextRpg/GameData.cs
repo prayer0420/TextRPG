@@ -16,17 +16,14 @@ namespace TextRpg
         public Inventory Inventory { get; set; }
         public Shop Shop { get; set; }
         public GameMode Mode { get; set; }
-        public int DungeonClearCount { get; set; }
-        public int RequireDungeonClearCount { get; set; }
 
-        public GameData(Player player, Inventory inventory, Shop shop, GameMode mode, int dungeonClearCount, int requireDungeonClearCount)
+
+        public GameData(Player player, Inventory inventory, Shop shop, GameMode mode)
         {
             Player = player;
             Inventory = inventory;
             Shop = shop;
             Mode = mode;
-            DungeonClearCount = dungeonClearCount;
-            RequireDungeonClearCount = requireDungeonClearCount;
         }
     }
 }
