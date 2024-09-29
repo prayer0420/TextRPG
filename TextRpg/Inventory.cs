@@ -14,15 +14,15 @@ namespace TextRpg
         const int MAX_SLOT = 10;
         //아이템 모아놓는곳
 
-        public List<Item> _items { get; private set; } = new List<Item>(MAX_SLOT);
-        private int _itemCount;
+        public List<Item> Inven { get; set; } = new List<Item>(MAX_SLOT);
+        private int invenCount;
 
         public Inventory()
         {
 
             for (int i = 0; i < MAX_SLOT; i++)
             {
-                _items.Add(null);
+                Inven.Add(null);
             }
         }
 
@@ -52,8 +52,8 @@ namespace TextRpg
                 return false;
             }
 
-            _items[emptySlot] = item;
-            _itemCount++;
+            Inven[emptySlot] = item;
+            invenCount++;
             return true;
         }
 
@@ -62,7 +62,7 @@ namespace TextRpg
             if(slot < 0 || slot >= MAX_SLOT)
                 return null;
 
-            return _items[slot];
+            return Inven[slot];
         }
 
         public bool RemoveItem(Item item)
@@ -74,14 +74,14 @@ namespace TextRpg
             if(slot < 0) 
                 return false;
 
-            _items[slot] = null;
-            _itemCount--;
+            Inven[slot] = null;
+            invenCount--;
             return true;
         }
 
         public void PrintIven()
         {
-            foreach(Item item in _items)
+            foreach(Item item in Inven)
             {
                 if(item != null)
                 {
@@ -96,9 +96,9 @@ namespace TextRpg
         {
             for (int i = 0; i < MAX_SLOT; i++)
             {
-                if (_items[i] != null)
+                if (Inven[i] != null)
                 {
-                    _items[i] = null;
+                    Inven[i] = null;
                 }
             }
         }
@@ -107,7 +107,7 @@ namespace TextRpg
         {
             for(int i = 0;i < MAX_SLOT;i++)
             {
-                if( _items[i] == null)
+                if( Inven[i] == null)
                     return i;
             }
             return -1;
@@ -117,7 +117,7 @@ namespace TextRpg
         {
             for (int i = 0; i < MAX_SLOT; i++)
             {
-                if(_items[i] == item)
+                if(Inven[i] == item)
                     return i;
             }
             return -1;
@@ -156,12 +156,12 @@ namespace TextRpg
             Console.WriteLine("[아이템 목록]");
 
             //아이템 보여주기
-            for (int i = 0; i < _items.Count; i++)
+            for (int i = 0; i < Inven.Count; i++)
             {
-                if (_items[i] != null)
+                if (Inven[i] != null)
                 {
                     Console.Write($"{i + 1}. ");
-                    _items[i].PrintInfo();
+                    Inven[i].PrintInfo();
                     Console.WriteLine();
                 }
             }
@@ -176,18 +176,21 @@ namespace TextRpg
                 return;
             }
 
-            //해당번오의 아이템을 장착 할 수 있는지 없는지 체크
+            //해당번호의 아이템을 장착 할 수 있는지 없는지 체크
             int number = int.Parse(input) - 1;
-            if (_items[number]._Isequip)
-            {
-                _player.Unequip(_items[number]);
-            }
-            else
-            {
-                _player.Equip(_items[number]);
-            }
 
+            if (Inven[number]._itemType == ItemType.EquipmentItem)
+            {
+                EquipmentItem item  = (EquipmentItem)Inven[number];
+                if(item._Isequip)
+                {
+                    _player.Unequip(item);
+                }
+                else
+                {
+                    _player.Equip(item);
+                }
+            }
         }
-
     }
 }

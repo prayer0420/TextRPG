@@ -26,7 +26,7 @@ namespace TextRpg
             const int REWARD = 1000;
 
             //권장 방어력보다 낮으면
-            if (_player._def < REQUIRE_DEF)
+            if (_player.Def < REQUIRE_DEF)
             {
                 //40%확률로 실패
                 int rand = _globalRandom.Next(0, 10);
@@ -52,13 +52,13 @@ namespace TextRpg
                     Console.WriteLine("[탐험결과]");
                     int rand2 = _globalRandom.Next(20, 36);
                     Console.Write($"체력 {_player.GetHp()} -> ");
-                    _player.OnDamaged(rand2 - (REQUIRE_DEF - _player._def));
+                    _player.OnDamaged(rand2 - (REQUIRE_DEF - _player.Def));
                     Console.WriteLine($"{_player.GetHp()}");
 
-                    rand2 = _globalRandom.Next(_player._atk, _player._atk * 2);
-                    Console.Write($"Gold {_player._gold} -> ");
-                    _player._gold += REWARD + rand2;
-                    Console.WriteLine($"{_player._gold}");
+                    rand2 = _globalRandom.Next(_player.Atk, _player.Atk * 2);
+                    Console.Write($"Gold {_player.Gold} -> ");
+                    _player.Gold += REWARD + rand2;
+                    Console.WriteLine($"{_player.Gold}");
 
                     //클리어 횟수 추가
                     DungeonClearCount++;
@@ -90,13 +90,13 @@ namespace TextRpg
                 Console.WriteLine("[탐험결과]");
                 int rand2 = _globalRandom.Next(20, 36);
                 Console.Write($"체력 {_player.GetHp()} -> ");
-                _player.OnDamaged(rand2 - (_player._def - REQUIRE_DEF));
+                _player.OnDamaged(rand2 - (_player.Def - REQUIRE_DEF));
                 Console.WriteLine($"{_player.GetHp()}");
 
-                rand2 = _globalRandom.Next(_player._atk, _player._atk * 2);
-                Console.Write($"Gold {_player._gold} -> ");
-                _player._gold += REWARD + rand2;
-                Console.WriteLine($"{_player._gold}");
+                rand2 = _globalRandom.Next(_player.Def, _player.Def * 2);
+                Console.Write($"Gold {_player.Gold} -> ");
+                _player.Gold += REWARD + rand2;
+                Console.WriteLine($"{_player.Gold}");
 
                 //클리어 횟수 추가
                 DungeonClearCount++;
@@ -124,7 +124,7 @@ namespace TextRpg
             const int REWARD = 1700;
 
             //권장 방어력보다 낮으면
-            if (_player._def < REQUIRE_DEF)
+            if (_player.Def < REQUIRE_DEF)
             {
                 //60%확률로 실패
                 int rand = _globalRandom.Next(0, 10);
@@ -150,13 +150,13 @@ namespace TextRpg
                     Console.WriteLine("[탐험결과]");
                     int rand2 = _globalRandom.Next(20, 36);
                     Console.Write($"체력 {_player.GetHp()} -> ");
-                    _player.OnDamaged(rand2 - (REQUIRE_DEF - _player._def));
+                    _player.OnDamaged(rand2 - (REQUIRE_DEF - _player.Def));
                     Console.WriteLine($"{_player.GetHp()}");
 
-                    rand2 = _globalRandom.Next(_player._atk, _player._atk * 2);
-                    Console.Write($"Gold {_player._gold} -> ");
-                    _player._gold += (REWARD + (REWARD * (rand2 / 100)));
-                    Console.WriteLine($"{_player._gold}");
+                    rand2 = _globalRandom.Next(_player.Atk, _player.Atk * 2);
+                    Console.Write($"Gold {_player.Gold} -> ");
+                    _player.Gold += (REWARD + (REWARD * (rand2 / 100)));
+                    Console.WriteLine($"{_player.Gold}");
                     //클리어 횟수 추가
                     DungeonClearCount++;
                     Game.GetInstance().CheckLevelUp(_player);
@@ -184,13 +184,13 @@ namespace TextRpg
                 Console.WriteLine("[탐험결과]");
                 int rand2 = _globalRandom.Next(20, 36);
                 Console.Write($"체력 {_player.GetHp()} -> ");
-                _player.OnDamaged(rand2 - (_player._def - REQUIRE_DEF));
+                _player.OnDamaged(rand2 - (_player.Def - REQUIRE_DEF));
                 Console.WriteLine($"{_player.GetHp()}");
 
-                rand2 = _globalRandom.Next(_player._atk, _player._atk * 2);
-                Console.Write($"Gold {_player._gold} -> ");
-                _player._gold += (REWARD + (REWARD * (rand2 / 100)));
-                Console.WriteLine($"{_player._gold}");
+                rand2 = _globalRandom.Next(_player.Atk, _player.Atk * 2);
+                Console.Write($"Gold {_player.Gold} -> ");
+                _player.Gold += (REWARD + (REWARD * (rand2 / 100)));
+                Console.WriteLine($"{_player.Gold}");
 
                 //클리어 횟수 추가
                 DungeonClearCount++;
@@ -219,7 +219,7 @@ namespace TextRpg
             const int REWARD = 2000;
 
             //권장 방어력보다 낮으면
-            if (_player._def < REQUIRE_DEF)
+            if (_player.Def < REQUIRE_DEF)
             {
                 //70%확률로 실패
                 int rand = _globalRandom.Next(0, 10);
@@ -245,13 +245,13 @@ namespace TextRpg
                     Console.WriteLine("[탐험결과]");
                     int rand2 = _globalRandom.Next(20, 36);
                     Console.Write($"체력 {_player.GetHp()} -> ");
-                    _player.OnDamaged(rand2 - (REQUIRE_DEF - _player._def));
+                    _player.OnDamaged(rand2 - (REQUIRE_DEF - _player.Def));
                     Console.WriteLine($"{_player.GetHp()}");
 
-                    rand2 = _globalRandom.Next(_player._atk, _player._atk * 2);
-                    Console.Write($"Gold {_player._gold} -> ");
-                    _player._gold += (REWARD + (REWARD * (rand2 / 100)));
-                    Console.WriteLine($"{_player._gold}");
+                    rand2 = _globalRandom.Next(_player.Atk, _player.Atk * 2);
+                    Console.Write($"Gold {_player.Gold} -> ");
+                    _player.Gold += (REWARD + (REWARD * (rand2 / 100)));
+                    Console.WriteLine($"{_player.Gold}");
 
 
                     //클리어 횟수 추가
@@ -282,13 +282,13 @@ namespace TextRpg
                 Console.WriteLine("[탐험결과]");
                 int rand2 = _globalRandom.Next(20, 36);
                 Console.Write($"체력 {_player.GetHp()} -> ");
-                _player.OnDamaged(rand2 - (_player._def - REQUIRE_DEF));
+                _player.OnDamaged(rand2 - (_player.Def - REQUIRE_DEF));
                 Console.WriteLine($"{_player.GetHp()}");
 
-                rand2 = _globalRandom.Next(_player._atk, _player._atk * 2);
-                Console.Write($"Gold {_player._gold} -> ");
-                _player._gold += (REWARD + (REWARD * (rand2 / 100)));
-                Console.WriteLine($"{_player._gold}");
+                rand2 = _globalRandom.Next(_player.Atk, _player.Atk * 2);
+                Console.Write($"Gold {_player.Gold} -> ");
+                _player.Gold += (REWARD + (REWARD * (rand2 / 100)));
+                Console.WriteLine($"{_player.Gold}");
 
                 //클리어 횟수 추가
                 DungeonClearCount++;

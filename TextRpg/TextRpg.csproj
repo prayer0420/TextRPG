@@ -89,20 +89,23 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Creature.cs" />
+    <Compile Include="Item\ConsumableItem.cs" />
+    <Compile Include="Creature\Creature.cs" />
     <Compile Include="Dungeon.cs" />
+    <Compile Include="Item\EquipmentItem.cs" />
+    <Compile Include="Item\ETCItem.cs" />
     <Compile Include="Game.cs" />
     <Compile Include="GameData.cs" />
     <Compile Include="Inventory.cs" />
-    <Compile Include="Item.cs" />
-    <Compile Include="Monster.cs" />
-    <Compile Include="Player.cs" />
+    <Compile Include="Item\Item.cs" />
+    <Compile Include="Creature\Monster.cs" />
+    <Compile Include="Creature\Player.cs" />
+    <Compile Include="Item\ItemDic.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Quest.cs" />
+    <Compile Include="Quest\Quest.cs" />
     <Compile Include="QuestManager.cs" />
     <Compile Include="Shop.cs" />
-    <Compile Include="SoundPlayer.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

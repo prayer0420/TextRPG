@@ -24,34 +24,37 @@ namespace TextRpg
         protected bool IsInitialized { get; set; } = false;
 
         protected PlayerType _playerType = PlayerType.None;
-        public Item EquippedWeapon { get; private set; }
-        public Item EquippedArmor{ get; private set; }
+        public EquipmentItem EquippedWeapon { get; private set; }
+        public EquipmentItem EquippedArmor { get; private set; }
 
         public bool IsEquippedWeapon { get; private set; } = false;
         public bool IsEquippedArmor { get; private set; } = false ;
-        public override int _level { get;  set; }
-
-        public override int _atk { get;  set; } 
-        public override int _def { get;  set; } 
-        public override int _gold { get; set; }
-
-        public override int _itemAtk { get; set; }
-        public override int _itemDef { get; set; }
-
-        public override int _hp { get; set; }
-        public override int _initHp { get; set; }
-
+        public int Level { get;  set; }
+        public int ItemAtk { get; set; }
+        public int _itemDef { get; set; }
 
         //인벤
         public List<Player> players = new List<Player>();
 
         public virtual void Initialize()
         {
-
+            Hp = InitHp;
+            Mp = InitMp;
+            Gold = 5000;
         }
         public Player(PlayerType type) : base(CreatureType.Player)
         {
             _playerType = type;
+        }
+
+        public virtual void SetInfo(int atk, int def, int hp, int mp, int level)
+        {
+            Atk = atk;
+            Def = def;
+            InitHp = hp;
+            Hp = hp;
+            InitMp = mp;
+            Level = level;
         }
 
         public PlayerType GetPlayerType()
@@ -59,17 +62,17 @@ namespace TextRpg
             return _playerType;
         }
 
-        public bool CanEquip(Item item)
+        public bool CanEquip(EquipmentItem item)
         {
             if(item == null) 
                 return false;
             return item._itemClass == _playerType;
         }
-        public void Equip(Item item)
+        public void Equip(EquipmentItem item)
         {
             if(CanEquip(item))
             {
-                if(item._itemType == ItemType.Weapon)
+                if(item.equipmentType== EquipmentType.Weapon)
                 {
                     if (IsEquippedWeapon == true)
                         return;
@@ -80,9 +83,9 @@ namespace TextRpg
                     Console.WriteLine($"{item._itemName}이(가) 무기로 장착되었습니다.");
                     //스탯 변경
                     Weapon weapon = (Weapon)item;
-                    _itemAtk += weapon.GetDamage();
+                    ItemAtk += weapon.GetDamage();
                 }
-                else if(item._itemType == ItemType.Armor)
+                else if((item.equipmentType == EquipmentType.Armor))
                 {
                     if (IsEquippedArmor == true)
                         return;
@@ -101,11 +104,11 @@ namespace TextRpg
                 Console.WriteLine($"{item._itemName}은(는) {_playerType} 직업이 장착할 수 없습니다.");
             }
         }
-        public void Unequip(Item item)
+        public void Unequip(EquipmentItem item)
         {
             if (CanEquip(item))
             {
-                if (item._itemType == ItemType.Weapon)
+                if ((item.equipmentType == EquipmentType.Weapon))
                 {
                     IsEquippedWeapon = false;
                     EquippedWeapon = null;
@@ -113,9 +116,9 @@ namespace TextRpg
                     Console.WriteLine($"{item._itemName}이(가) 해제되었습니다.");
                     //스탯 변경
                     Weapon weapon = (Weapon)item;
-                    _itemAtk -= weapon.GetDamage();
+                    ItemAtk -= weapon.GetDamage();
                 }
-                else if (item._itemType == ItemType.Armor)
+                else if ((item.equipmentType == EquipmentType.Armor))
                 {
                     IsEquippedArmor = false;
                     EquippedArmor = null;
@@ -127,20 +130,21 @@ namespace TextRpg
                 }
             }
         }
-
-        public override void LevelUp()
+        public virtual void LevelUp()
         {
-            base.LevelUp();
+            Atk += (int)(Atk * 0.3f);
+            Def += (int)(Def * 0.3f);
+            Hp += (int)(Hp * 0.3f);
         }
 
         public void ShowInfo()
         {
-            Console.WriteLine($"레벨 : {_level}");
+            Console.WriteLine($"레벨 : {Level}");
             Console.WriteLine($"직업: {GetPlayerType()}");
-            Console.WriteLine($"공격력 : {_atk + _itemAtk}  (+{_itemAtk})");
-            Console.WriteLine($"방어력 : {_def + _itemDef}  (+{_itemDef})");
+            Console.WriteLine($"공격력 : {Atk + ItemAtk}  (+{ItemAtk})");
+            Console.WriteLine($"방어력 : {Def + _itemDef}  (+{_itemDef})");
             Console.WriteLine($"체력 : {GetHp()}");
-            Console.WriteLine($"골드 : {_gold}");
+            Console.WriteLine($"골드 : {Gold}");
 
             Console.WriteLine();
             Console.WriteLine();
@@ -162,23 +166,14 @@ namespace TextRpg
 
     class Knight : Player
     {
-        
         public Knight() : base(PlayerType.Knight)
         {
                 
         }
         public override void Initialize()
         {
-            SetInfo(1, 10, 10, 90);  // 레벨 1, 공격력 10, 방어력 10, 체력 90으로 초기화
-            _hp = _initHp;
-            _gold = 10000;
-        }
-        public override void LevelUp()
-        {
-            base.LevelUp();
-            _atk += (int)(_atk * 0.3f);
-            _def += (int)(_def * 0.3f);
-            _hp += (int)(_hp * 0.3f);
+            base.Initialize();
+            SetInfo(10, 10, 90, 100,1);  // 레벨 1, 공격력 10, 방어력 10, 체력 90으로 초기화
         }
     }
 
@@ -188,12 +183,13 @@ namespace TextRpg
         {
         
         }
+        public override void Initialize()
+        {
+            SetInfo(13, 7, 90, 120, 1);  // 레벨 1, 공격력 10, 방어력 10, 체력 90으로 초기화
+        }
         public override void LevelUp()
         {
             base.LevelUp();
-            _atk += (int)(_atk * 0.4f);
-            _def += (int)(_def * 0.2f);
-            _hp += (int)(_hp * 0.3f);
         }
     }
 
@@ -203,13 +199,15 @@ namespace TextRpg
         {
            
         }
+
+        public override void Initialize()
+        {
+            SetInfo(15, 5, 90, 150, 1);  // 레벨 1, 공격력 10, 방어력 10, 체력 90으로 초기화
+        }
+
         public override void LevelUp()
         {
             base.LevelUp();
-            _atk += (int)(_atk * 0.45f);
-            _def += (int)(_def * 0.23f);
-            _hp += (int)(_hp * 0.25f);
         }
     }
-
 }

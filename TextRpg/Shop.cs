@@ -23,7 +23,7 @@ namespace TextRpg
             Console.WriteLine("필요한 아이템을 얻을 수 있는 상점 입니다");
             Console.WriteLine();
             Console.WriteLine("[보유골드]");
-            Console.WriteLine($"{player._gold} G");
+            Console.WriteLine($"{player.Gold} G");
 
             Console.WriteLine("[아이템 목록]");
             if(shopItemDic.Count ==0)
@@ -72,9 +72,17 @@ namespace TextRpg
                     weapon = new Weapon();
                 } while (shopItems.Any(existingItem => existingItem._itemName == weapon._itemName));
 
-                shopItems.Add(weapon);
-                shopItemDic.Add(weapon.ItemId, false);
-                shopItemlist.Add(weapon._itemName);
+                if (!shopItemDic.ContainsKey(weapon.ItemId))
+                {
+                    shopItems.Add(weapon);
+                    shopItemDic.Add(weapon.ItemId, false);
+                    shopItemlist.Add(weapon._itemName);
+                }
+                else
+                {
+                    // 이미 존재하는 경우 처리 로직
+                    Console.WriteLine($"{weapon.ItemId}의 아이템은 이미 존재합니다");
+                }
             }
 
             // 방어구 추가
@@ -85,10 +93,18 @@ namespace TextRpg
                 {
                     armor = new Armor();
                 } while (shopItems.Any(existingItem => existingItem._itemName == armor._itemName));
-
-                shopItems.Add(armor);
-                shopItemDic.Add(armor.ItemId, false);
-                shopItemlist.Add(armor._itemName);
+                
+                if (!shopItemDic.ContainsKey(armor.ItemId))
+                {
+                    shopItems.Add(armor);
+                    shopItemDic.Add(armor.ItemId, false);
+                    shopItemlist.Add(armor._itemName);
+                }
+                else
+                {
+                    // 이미 존재하는 경우 처리 로직
+                    Console.WriteLine($" {armor.ItemId}의 아이템은 이미 존재합니다");
+                }
             }
 
         }
@@ -99,32 +115,34 @@ namespace TextRpg
             {
                 bool isSold = shopItemDic[item.ItemId];
 
-                if (item._itemType == ItemType.Weapon)
+                if ((item._itemType == ItemType.EquipmentItem))
                 {
-                    Weapon weapon = (Weapon)item;
-                    Console.Write($"- {weapon._itemName}   | 공격력 +{weapon.GetDamage()}   | {weapon._iteminfo}");
+                    if(item is Weapon)
+                    {
+                        Weapon weapon = (Weapon)item;
+                        Console.Write($"- {weapon._itemName}   | 공격력 +{weapon.GetDamage()}   | {weapon._iteminfo}");
 
-                    if (isSold)
-                    {
-                        Console.WriteLine($"| 구매완료");
+                        if (isSold)
+                        {
+                            Console.WriteLine($"| 구매완료");
+                        }
+                        else
+                        {
+                            Console.WriteLine($"| {weapon._price}G");
+                        }
                     }
-                    else
+                    else if (item is Armor)
                     {
-                        Console.WriteLine($"| {weapon._price}G");
-                    }
-                }
-                else if (item._itemType == ItemType.Armor)
-                {
-                    Armor armor = (Armor)item;
-                    Console.Write($"- {armor._itemName}   | 방어력 +{armor.GetDefence()}   | {armor._iteminfo}");
-
-                    if (isSold)
-                    {
-                        Console.WriteLine($"| 구매완료");
-                    }
-                    else
-                    {
-                        Console.WriteLine($"| {armor._price}G");
+                        Armor armor = (Armor)item;
+                        Console.Write($"- {armor._itemName}   | 방어력 +{armor.GetDefence()}   | {armor._iteminfo}");
+                        if (isSold)
+                        {
+                            Console.WriteLine($"| 구매완료");
+                        }
+                        else
+                        {
+                            Console.WriteLine($"| {armor._price}G");
+                        }
                     }
                 }
             }
@@ -144,34 +162,38 @@ namespace TextRpg
 
                 Console.Write($"{i + 1}. ");
 
-                if (item._itemType == ItemType.Weapon)
+                if (item._itemType == ItemType.EquipmentItem)
                 {
-                    Weapon weapon = (Weapon)item;
-                    Console.Write($"- {weapon._itemName}   | 공격력 +{weapon.GetDamage()}   | {weapon._iteminfo}");
+                    if( item is Weapon)
+                    {
+                        Weapon weapon = (Weapon)item;
+                        Console.Write($"- {weapon._itemName}   | 공격력 +{weapon.GetDamage()}   | {weapon._iteminfo}");
 
-                    if (IsSold)
-                    {
-                        Console.WriteLine($"| 구매완료");
+                        if (IsSold)
+                        {
+                            Console.WriteLine($"| 구매완료");
+                        }
+                        else
+                        {
+                            Console.WriteLine($"| {weapon._price}G");
+                        }
                     }
-                    else
+                    else if (item is Armor)
                     {
-                        Console.WriteLine($"| {weapon._price}G");
+                        Armor armor = (Armor)item;
+                        Console.Write($"- {armor._itemName}   | 방어력 +{armor.GetDefence()}   | {armor._iteminfo}");
+
+                        if (IsSold)
+                        {
+                            Console.WriteLine($"| 구매완료");
+                        }
+                        else
+                        {
+                            Console.WriteLine($"| {armor._price}G");
+                        }
                     }
                 }
-                else if (item._itemType == ItemType.Armor)
-                {
-                    Armor armor = (Armor)item;
-                    Console.Write($"- {armor._itemName}   | 방어력 +{armor.GetDefence()}   | {armor._iteminfo}");
-
-                    if (IsSold)
-                    {
-                        Console.WriteLine($"| 구매완료");
-                    }
-                    else
-                    {
-                        Console.WriteLine($"| {armor._price}G");
-                    }
-                }
+                
             }
 
             Console.WriteLine("0. 나가기");
@@ -201,12 +223,12 @@ namespace TextRpg
             }
 
             // 플레이어의 골드 확인
-            if (player._gold >= selectedItem._price)
+            if (player.Gold >= selectedItem._price)
             {
                 // 구매 처리
                 shopItemDic[selectedItem.ItemId] = true;
                 Inventory.GetInstance().AddItem(selectedItem);
-                player._gold -= selectedItem._price;
+                player.Gold -= selectedItem._price;
                 Console.WriteLine($"{selectedItem._itemName}을 구매하셨습니다!");
                 Console.WriteLine("자동으로 마을로 이동합니다");
             }
@@ -215,20 +237,18 @@ namespace TextRpg
                 Console.WriteLine("Gold가 부족합니다");
             }
         }
-
-
         public void SellItem(Player player)
         {
             Inventory inventory = Inventory.GetInstance();
-            int c = inventory._items.Count;
+            int c = inventory.Inven.Count;
             Console.WriteLine("아이템 팔기");
             Console.WriteLine("팔기 원하는 아이템의 번호를 입력하면 판매 할 수 있습니다");
 
             //인벤 보여주기
             Console.WriteLine("[아이템 목록]");
-            for (int i = 0; i < inventory._items.Count; i++)
+            for (int i = 0; i < inventory.Inven.Count; i++)
             {
-                Item item = inventory._items[i];
+                Item item = inventory.Inven[i];
                 if (item != null)
                 {
                     Console.Write($"{i + 1}. ");
@@ -254,14 +274,14 @@ namespace TextRpg
 
             int number = int.Parse(input) - 1;
             //골드 증가(기존 가치의 80%)
-            Item item2 = inventory._items[number];
-            player._gold += (int)(item2._price* 0.8f);
+            Item item2 = inventory.Inven[number];
+            player.Gold += (int)(item2._price* 0.8f);
 
             //알림
             Console.WriteLine($"{item2._itemName}을 팔았습니다! ");
 
             //인벤토리 창에서 없애기
-            inventory.RemoveItem(inventory._items[number]);
+            inventory.RemoveItem(inventory.Inven[number]);
 
         }
     }

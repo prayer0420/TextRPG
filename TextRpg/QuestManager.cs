@@ -39,17 +39,14 @@ namespace TextRpg
                 //퀘스트 요구레벨이 플레이어 요구레벨보다 낮으면서
                 //퀘스트의 선행 퀘스트가 없거나 선행 퀘스트의 상태가 완료 상태라면
                 //진행 가능한 퀘스트임!
-                if(quest.RequiredLevel <= player._level 
+                if(quest.RequiredLevel <= player.Level 
                     && (quest.RequiredQuest == null 
                     || quest.RequiredQuest.Status == QuestStatus.Completed))
                 {
                     Console.WriteLine($"{i + 1}. {quest.Name} (레벨 {quest.RequiredLevel} 이상)");
                 }
             }
-            
-
         }
-
 
         //진행중인 퀘스트의 진행량 보여주기
         public void ShowActiveQuests()
@@ -73,7 +70,7 @@ namespace TextRpg
 
             //플레이어레벨이 요구레벨보다 낮으면 X
             Quest quest = availableQuests[index - 1];
-            if (quest.RequiredLevel > player._level)
+            if (quest.RequiredLevel > player.Level)
             {
                 Console.WriteLine($"레벨 {quest.RequiredLevel} 이상이어야 이 퀘스트를 수락할 수 있습니다.");
                 return;
@@ -125,7 +122,7 @@ namespace TextRpg
             //퀘스트가 완료 상태라면
             if(quest.Status == QuestStatus.Completed)
             {
-                player._gold += quest.GoldReward;
+                player.Gold += quest.GoldReward;
                 Console.WriteLine($"골드 {quest.GoldReward}을(를) 받았습니다.");
                 foreach(var reward in quest.Rewards)
                 {

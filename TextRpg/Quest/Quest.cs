@@ -27,18 +27,16 @@ namespace TextRpg
         public Quest RequiredQuest { get; set; } //선행 퀘스트
         public int RequiredLevel {  get; set; } //필요레벨
 
-        public Quest(string name, string descrtipon, Dictionary<string, int> objectives, Dictionary<string, int> progress, List<Item> rewards, int goldReward, QuestStatus status, int requiredLevel)
+        public Quest(string name, string descrtipon, Dictionary<string, int> objectives, List<Item> rewards, int goldReward, QuestStatus status, int requiredLevel)
         {
             Name = name;
             Description = descrtipon;
             Objectives = objectives;
-            Progress = progress;
-            
-            foreach(var objecitve in Objectives)
+            Progress = new Dictionary<string, int>();
+            foreach (var objective in objectives)
             {
-                progress[objecitve.Key] = 0;
+                Progress[objective.Key] = 0;
             }
-
             Rewards = rewards;
             GoldReward = goldReward;
             Status = status;

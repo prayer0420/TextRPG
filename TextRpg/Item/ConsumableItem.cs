@@ -6,8 +6,16 @@ using System.Threading.Tasks;
 
 namespace TextRpg
 {
-    class SoundPlayer
+    enum CosunmalbeType
     {
+        None = 0,
+        HpPortion = 1,
+        MpPortion = 2,
+    }
+
+    class ConsumableItem : Item
+    {
+
 
     }
 }
