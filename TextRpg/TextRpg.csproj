@@ -89,6 +89,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Battle.cs" />
     <Compile Include="Item\ConsumableItem.cs" />
     <Compile Include="Creature\Creature.cs" />
     <Compile Include="Dungeon.cs" />

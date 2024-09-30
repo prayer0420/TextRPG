@@ -21,29 +21,34 @@ namespace TextRpg
 
     class Game
     {
-
-        public GameMode _mode = GameMode.Lobby;
-        public Inventory _inventory = Inventory.GetInstance();
-        public Shop _shop = new Shop();
-        public Player _player = null;
-        public Monster _monster = null;
-        public GameData _gameData;
+        public GameMode mode = GameMode.Lobby;
+        public Inventory inventory = Inventory.GetInstance();
+        public Shop shop = new Shop();
+        public Player player = null;
+        public Monster monster = null;
+        public GameData gameData;
         public string PlayerName;
-        public static Random _globalRandom = new Random();
+        public static Random globalRandom = new Random();
+        private static int dungeonLevel = 1;
+        private static Game instance = new Game();
 
-        private static Game _instance = new Game();
+
+        public TimeSpan TotalPlayTime { get; private set; }  // 총 플레이 시간
+        public Stopwatch stopwatch { get; set; }  // 게임 실행 중 시간 추적
 
         public static Game GetInstance()
         {
-            if (_instance == null)
-                return _instance;
-            return _instance;
+            if (instance == null)
+                return instance;
+            return instance;
         }
 
         //게임데이터 저장
         public void SaveGameData()
         {
-            GameData gameData = new GameData(_player, _inventory, _shop, _mode);
+            Console.Clear();
+
+            GameData gameData = new GameData(player, inventory, shop, mode);
             string jsonData = JsonConvert.SerializeObject(gameData, Formatting.Indented,
                 new JsonSerializerSettings
                 {
@@ -56,6 +61,8 @@ namespace TextRpg
         // 게임 데이터 불러오기
         public bool LoadGameData()
         {
+            Console.Clear();
+
             string filePath = "gameData.json";
 
             if (File.Exists(filePath))
@@ -67,13 +74,13 @@ namespace TextRpg
                 });
 
                 // 불러온 데이터 적용
-                _player = gameData.Player;
+                player = gameData.Player;
 
-                _inventory = gameData.Inventory;
-                Inventory.SetInstance(_inventory);
+                inventory = gameData.Inventory;
+                Inventory.GetInstance();
 
-                _shop = gameData.Shop;
-                _mode = gameData.Mode;
+                shop = gameData.Shop;
+                mode = gameData.Mode;
 
                 Console.WriteLine("게임 데이터를 불러왔습니다.");
                 return true;
@@ -88,20 +95,28 @@ namespace TextRpg
         // Start 메서드 수정
         public void Start()
         {
+            Console.Clear();
+
             if (!LoadGameData())
             {
-                _mode = GameMode.Lobby;
+                mode = GameMode.Lobby;
+                //처음 시작한거라면 시간 초기셋팅
+                TotalPlayTime = TimeSpan.Zero;
+                stopwatch= new Stopwatch();
+                stopwatch.Start();
+                SetPlayTime(0,15,0);
+
+
                 Console.WriteLine("스파르타 던전에 오신 여러분 환영합니다.");
                 Console.Write("원하시는 이름을 설정해주세요.\n>> ");
                 PlayerName = Console.ReadLine();
 
                 MainProcess(PlayerName);
-
             }
 
             while (true)
             {
-                _mode |= GameMode.Town;
+                mode = GameMode.Town;
                 MainProcess(PlayerName);
             }
         }
@@ -109,6 +124,8 @@ namespace TextRpg
 
         public void Exit()
         {
+            Console.Clear();
+
             Console.WriteLine("게임을 종료합니다");
             // 게임 종료 시 데이터 저장
             //SaveGameData(_gameData);
@@ -117,7 +134,9 @@ namespace TextRpg
 
         public void MainProcess(string PlayerName)
         {
-            switch (_mode)
+            Console.Clear();
+
+            switch (mode)
             {
                 case GameMode.Lobby:
                     ProcessLobby(PlayerName);
@@ -126,7 +145,7 @@ namespace TextRpg
                     ProcessTown();
                     break;
                 case GameMode.Dungeon:
-                    ProcessDungeon(_player);
+                    ProcessDungeon(player);
                     break;
             }
         }
@@ -134,6 +153,8 @@ namespace TextRpg
 
         public void ProcessLobby(string playerName)
         {
+            Console.Clear();
+
             Console.WriteLine($"{playerName}님! 세계가 당신을 기다립니다. 직업을 선택하세요");
             Console.WriteLine("[1] 기사");
             Console.WriteLine("[2] 궁수");
@@ -142,19 +163,19 @@ namespace TextRpg
             switch (input)
             {
                 case "1":
-                    _player = new Knight();
-                    _player.Initialize();
-                    _mode = GameMode.Town;
+                    player = new Knight();
+                    player.Initialize();
+                    mode = GameMode.Town;
                     break;
                 case "2":
-                    _player = new Archor();
-                    _mode = GameMode.Town;
-                    _player.Initialize();
+                    player = new Archor();
+                    mode = GameMode.Town;
+                    player.Initialize();
                     break;
                 case "3":
-                    _player = new Mage();
-                    _mode = GameMode.Town;
-                    _player.Initialize();
+                    player = new Mage();
+                    mode = GameMode.Town;
+                    player.Initialize();
                     break;
             }
         }
@@ -162,6 +183,8 @@ namespace TextRpg
 
         public void ProcessTown()
         {
+            Console.Clear();
+
             Console.WriteLine();
             Console.WriteLine("마을에 입장했습니다");
             Console.WriteLine("[1] 상태보기");
@@ -177,25 +200,25 @@ namespace TextRpg
             {
                 //상태보기
                 case "1":
-                    _player.ShowInfo();
+                    player.ShowInfo();
                     break;
                 //인벤토리
                 case "2":
-                    Inventory.GetInstance().ShowInven(_player);
+                    Inventory.GetInstance().ShowInven(player);
                     break;
                 //상점
                 case "3":
-                    _shop.ShowShop(_player);
+                    shop.ShowShop(player);
                     break;
                 //던전 입장
                 case "4":
-                    _mode = GameMode.Dungeon;
-                    ProcessDungeon(_player);
+                    mode = GameMode.Dungeon;
+                    ProcessDungeon(player);
                     break;
                 //퀘스트 의뢰소 가기
                 case "5":
                     AddQuests();
-                    ProcessQuest(_player);
+                    ProcessQuest(player);
                     break;
                 case "6":
                     SaveGameData();
@@ -209,6 +232,8 @@ namespace TextRpg
 
         public void ProcessQuest(Player player)
         {
+            Console.Clear();
+
             Console.WriteLine("어서오세요. 여기는 퀘스트 의뢰소 입니다.\n 무엇을 하시겠나요?");
             Console.WriteLine("1. 진행 가능한 퀘스트 보기");
             Console.WriteLine("2. 진행 중인 퀘스트 보기");
@@ -239,6 +264,8 @@ namespace TextRpg
 
         private void AddQuests()
         {
+            Console.Clear();
+
             // 독립적인 퀘스트 1
             Quest quest1 = new Quest
             (
@@ -257,7 +284,7 @@ namespace TextRpg
                 "잃어버린 반지 찾기",
                 "노부인:\n젊은이, 내 소중한 반지를 잃어버렸어요. 숲 속 어딘가에 있을 텐데, 찾아주겠나요?",
                 new Dictionary<string, int> { { "반지 찾기", 1 } },
-                new List<Item> { new ConsumableItem() },
+                new List<Item> { new ConsumableItem(ConsumalbeType.HpPortion) },
                 50,
                 QuestStatus.NotStarted,
                 1
@@ -313,8 +340,8 @@ namespace TextRpg
 
             // 퀘스트 간의 연계 설정
             quest4.RequiredQuest = quest3; // 퀘스트 3을 완료해야 퀘스트 4 진행 가능
-            quest5.RequiredQuest = quest4; // 퀘스트 4를 완료해야 퀘스트 5 진행 가능
-            quest6.RequiredQuest = quest5; // 퀘스트 5를 완료해야 퀘스트 6 진행 가능
+            quest5.RequiredQuest = quest4; 
+            quest6.RequiredQuest = quest5; 
 
             QuestManager questManager = QuestManager.GetInstance();
 
@@ -329,48 +356,125 @@ namespace TextRpg
         
         public void ProcessDungeon(Player _player)
         {
+            Console.Clear();
+
             //체력이 0이하라면 자동으로 마을로 가기
             if (_player.GetHp() <= 0)
             {
-                _mode = GameMode.Town;
+                mode = GameMode.Town;
                 Console.WriteLine("HP가 0이므로 던전에 들어갈 수 없습니다. 마을로 이동합니다");
                 return;
             }
 
-            Console.WriteLine("이곳에서 던전으로 들어가기전 활동을 할 수 있습니다\n");
-            Console.WriteLine("1. 쉬운 던전    |   방어력 5 이상 권장");
-            Console.WriteLine("2. 일반 던전    |   방어력 11 이상 권장");
-            Console.WriteLine("3. 어려운 던전    |   방어력 17 이상 권장");
+            Console.WriteLine($"던전 {dungeonLevel}층으로 이동합니다...");
+            List<Monster> monsters = GenerateMonsters();
+            Battle battle = new Battle(_player, monsters);
+            battle.Start();
+
+            if (!player.isDead())
+            {
+                dungeonLevel++;
+                player.RecoveryMp(10);
+                Console.WriteLine("MP가 10 회복되었습니다.");
+            }
+            else
+            {
+                Console.WriteLine("마을로 돌아갑니다.");
+                dungeonLevel = 1;
+            }
+
             Console.WriteLine("0. 나가기\n");
 
             Console.WriteLine("원하시는 행동을 입력해주세요");
             string input = Console.ReadLine();
 
-            switch (input)
+        }
+
+        private List<Monster> GenerateMonsters()
+        {
+
+            List<Monster> monsters = new List<Monster>();
+            int monsterCount = new Random().Next(1, 5);
+
+            for (int i = 0; i < monsterCount; i++)
             {
-                case "1":
-                    Dungeon.GetInstance().EasyDungeon(_player);
-                    break;
-                case "2":
-                    Dungeon.GetInstance().NormalDungeon(_player);
-                    break;
-                case "3":
-                    Dungeon.GetInstance().HardDungeon(_player);
-                    break;
-                case "0":
-                    Game.GetInstance()._mode = GameMode.Town;
-                    break;
+                int monsterType = new Random().Next(1, 3);
+                Monster monster = null;
+                switch (monsterType)
+                {
+                    case 1:
+                        monster = new Slime();
+                        monster.GenerateMonster(
+                            $"Lv.{2 * dungeonLevel} 미니언",
+                            2 * dungeonLevel,
+                            15 + (dungeonLevel * 5),
+                            5 + (dungeonLevel * 2),
+                            2 + dungeonLevel,
+                            0.1,
+                            0.05,
+                            2 * dungeonLevel,
+                            new List<Item> { new HpPortion() },
+                            100
+                        );
+                        break;
+                    case 2:
+                        monster = new Orc();
+                        monster.GenerateMonster(
+                            $"Lv.{3 * dungeonLevel} 오크",
+                            3 * dungeonLevel,
+                            10 + (dungeonLevel * 5),
+                            9 + (dungeonLevel * 3),
+                            3 + dungeonLevel,
+                            0.1,
+                            0.05,
+                            3 * dungeonLevel,
+                            new List<Item> { new MpPortion() },
+                            200
+                        );
+                        break;
+                    case 3:
+                        monster = new Skeleton();
+                        monster.GenerateMonster(
+                            $"Lv.{5 * dungeonLevel} 스켈레톤",
+                            5 * dungeonLevel,
+                            25 + (dungeonLevel * 10),
+                            8 + (dungeonLevel * 4),
+                            5 + dungeonLevel,
+                            0.1,
+                            0.05,
+                            5 * dungeonLevel,
+                            new List<Item> { new Weapon()},
+                            400
+                        );
+                        break;
+                }
+                monsters.Add(monster);
             }
+            return monsters;
         }
 
 
         public void CheckLevelUp(Player _player)
         {
+            Console.Clear();
+
             Console.Write($"Level Up! {_player.Level} -> ");
             _player.LevelUp();
             Console.WriteLine($"{_player.Level}으로 레벨업 하였습니다! ");
         }
 
+
+        public TimeSpan GetElapsedTime()
+        {
+            return TotalPlayTime + stopwatch.Elapsed;
+        }
+
+        public void SetPlayTime(int hours, int minutes, int seconds)
+        {
+            // 기존 플레이 시간과 타이머 리셋
+            stopwatch.Reset();
+            TotalPlayTime = new TimeSpan(hours, minutes, seconds);
+        }
 
 
         //public void ProcessRest(Player _player)
@@ -398,5 +502,8 @@ namespace TextRpg
         //        Console.WriteLine("마을로 이동합니다");
         //    }
         //}
+
+
+
     }
 }

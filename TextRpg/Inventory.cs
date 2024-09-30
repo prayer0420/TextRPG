@@ -8,27 +8,21 @@ using System.Threading.Tasks;
 
 namespace TextRpg
 {
-
+    
     class Inventory
     {
         const int MAX_SLOT = 10;
+        
         //아이템 모아놓는곳
-
         public List<Item> Inven { get; set; } = new List<Item>(MAX_SLOT);
         private int invenCount;
 
         public Inventory()
         {
-
             for (int i = 0; i < MAX_SLOT; i++)
             {
                 Inven.Add(null);
             }
-        }
-
-        public static void SetInstance(Inventory inventory)
-        {
-            _instance = inventory;
         }
 
         private static Inventory _instance;
@@ -73,8 +67,8 @@ namespace TextRpg
             int slot = FindItemSlot(item);
             if(slot < 0) 
                 return false;
-
-            Inven[slot] = null;
+            Inven.RemoveAt(slot);
+            //Inven[slot] = null;
             invenCount--;
             return true;
         }
@@ -125,7 +119,16 @@ namespace TextRpg
 
         public void ShowInven(Player _player)
         {
+            Console.Clear();
+
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine("[인벤토리]");
+            Console.ResetColor();
+
+            Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("[아이템 목록]");
+            Console.ResetColor();
+
             PrintIven();
 
             Console.WriteLine("1. 장착관리");
@@ -141,7 +144,8 @@ namespace TextRpg
                     break;
 
                 case "0":
-                    Game.GetInstance()._mode = GameMode.Town;
+                    Game.GetInstance().mode = GameMode.Town;
+                    Game.GetInstance().ProcessTown();
                     break;
             }
             Console.WriteLine();
@@ -149,23 +153,30 @@ namespace TextRpg
 
         public void EquipManager(Player _player)
         {
-            Console.WriteLine("보유 중인 아이템을 관리할 수 있습니다");
-            Console.WriteLine("아이템을 장착하거나 해제하려면 해당 번호를 입력하세요");
-            Console.WriteLine();
+            Console.Clear();
 
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine("[장착관리]");
+            Console.ResetColor();
+
+            Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("[아이템 목록]");
+            Console.ResetColor();
+
+            Console.WriteLine("보유 중인 아이템을 관리할 수 있습니다");
+            Console.WriteLine("아이템을 장착하거나 해제하려면 해당 번호를 입력하세요\n");
 
             //아이템 보여주기
-            for (int i = 0; i < Inven.Count; i++)
+            int itemCount = 0; ;
+            foreach(var item in Inven)
             {
-                if (Inven[i] != null)
+                if(item != null)
                 {
-                    Console.Write($"{i + 1}. ");
-                    Inven[i].PrintInfo();
+                    Console.Write($"{itemCount + 1}. ");
+                    Inven[itemCount++].PrintInfo();
                     Console.WriteLine();
                 }
             }
-
             Console.WriteLine("0. 나가기");
             Console.WriteLine("원하시는 행동을 입력해주세요");
             string input = Console.ReadLine();
@@ -173,22 +184,26 @@ namespace TextRpg
             //나가기
             if (input == "0")
             {
+                ShowInven(_player);
                 return;
             }
+
 
             //해당번호의 아이템을 장착 할 수 있는지 없는지 체크
             int number = int.Parse(input) - 1;
 
-            if (Inven[number]._itemType == ItemType.EquipmentItem)
+            if (Inven[number].itemType == ItemType.EquipmentItem)
             {
                 EquipmentItem item  = (EquipmentItem)Inven[number];
-                if(item._Isequip)
+                if(_player.CanEquip(item))
                 {
-                    _player.Unequip(item);
+                    _player.ToggleEquip(item);
+                    EquipManager(_player);
                 }
                 else
                 {
-                    _player.Equip(item);
+                    Console.WriteLine($"{item._itemName}은(는) {_player._playerType} 직업이 장착할 수 없습니다.");
+                    EquipManager(_player);
                 }
             }
         }

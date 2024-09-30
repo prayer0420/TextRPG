@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace TextRpg
 {
@@ -15,44 +18,68 @@ namespace TextRpg
         Skeleton = 3,
 
     }
-    class Monster : Creature
+    public class Monster : Creature
     {
 
-        protected MonsterType _monsterType = MonsterType.None;
-
-        protected Monster(MonsterType type): base(CreatureType.Monster)
+        public MonsterType monsterType = MonsterType.None;
+        public List<Item> DropItems { get; set; }
+        public int ExperienceGiven { get; set; }
+        public int DropGold { get; set; }
+        public string Name { get; set; }
+        public Monster(MonsterType type) : base(CreatureType.Monster)
         {
-            _monsterType = type;
+            monsterType = type;
+        }
+        public void GenerateMonster(string name, int level, int hp, int atk, int def, double criticalChance, double evasionChance, int expGiven, List<Item> dropItems, int dropGold)
+        {
+            Name = name;
+            Level = level;
+            InitHp = hp;
+            MaxHp = hp;
+            Hp = hp;
+            Atk = atk;
+            Def = def;
+            CriticalChance = criticalChance;
+            EvasionChance = evasionChance;
+            ExperienceGiven = expGiven;
+            DropItems = dropItems;
+            DropGold = dropGold;
         }
 
         public MonsterType GetMonsterType()
         {
-            return _monsterType;
+            return monsterType;
         }
-    }
-
-
-    class Slime : Monster
-    {
-        public Slime(): base(MonsterType.Slime)
+        public List<Item> DropLoot()
         {
-            SetInfo(1, 5, 3, 40);
+            return DropItems;
         }
     }
 
-    class Orc: Monster
+
+    public class Slime : Monster
+    {
+        public Slime() 
+        : base(MonsterType.Slime)
+        {
+            monsterType = MonsterType.Slime;
+
+        }
+    }
+
+    public class Orc: Monster
     {
         public Orc() : base(MonsterType.Orc)
         {
-            SetInfo(1, 7, 5, 50);
+            monsterType = MonsterType.Orc;
         }
     }
 
-    class Skeleton : Monster
+    public class Skeleton : Monster
     {
         public Skeleton() : base(MonsterType.Skeleton)
         {
-            SetInfo(1, 9, 6, 60);
+            monsterType = MonsterType.Skeleton;
         }
     }
 }

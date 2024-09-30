@@ -29,7 +29,7 @@ namespace TextRpg
         public static int _nextId = 0;
         public int _price = 500;
 
-        public ItemType _itemType {  get; set; }
+        public ItemType itemType {  get; set; }
 
         protected int _itemCount = 0;
         public int ItemId = 0;
@@ -39,7 +39,7 @@ namespace TextRpg
         public Item(ItemType itemType)
         {
             ItemId = _nextId++;
-            _itemType = itemType;
+            this.itemType = itemType;
         }
         
         public virtual void PrintInfo()
@@ -48,7 +48,7 @@ namespace TextRpg
 
         ItemType GetItemType() 
         { 
-            return _itemType; 
+            return itemType; 
         }
     }
 }

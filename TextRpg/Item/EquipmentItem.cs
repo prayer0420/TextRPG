@@ -30,17 +30,18 @@ namespace TextRpg
         Mage = 3,
     }
 
-    class EquipmentItem: Item
+    public class EquipmentItem: Item
     {
 
         public bool _Isequip { get; set; } = false;
-        public EquipmentType equipmentType;
+        public EquipmentType equipmentType { get; set; }
         public PlayerType _itemClass { get; set; }
         public ItemRarity _rarity { get; set; }
 
 
         public EquipmentItem(EquipmentType type) : base(ItemType.EquipmentItem)
         {
+            equipmentType = type;
             //희귀도 + 가격 선정
             int rand = _globalRandom.Next(0, 100);
             if (rand < 50)
@@ -59,8 +60,6 @@ namespace TextRpg
                 _price += 500;
             }
 
-
-
             //아이템 클래스
             int random = _globalRandom.Next(1, 100);
             if (random < 30)
@@ -76,40 +75,67 @@ namespace TextRpg
 
             ItemDic itemDic = ItemDic.GetInstance();
 
-            //Random random2 = new Random();
-            if (_itemClass == PlayerType.Knight)
+            //추후에 중복코드 깔끔하게 만들어보자..
+            if (equipmentType == EquipmentType.Weapon)
             {
-                //아이템 키 리스트 생성
-                List<string> _itemIdx = new List<string>(itemDic._KnightWeaponNames.Keys);
-                int randomNumber = _globalRandom.Next(0, _itemIdx.Count);
-                //랜덤 인덱스에 해당하는 키(아이템 이름) 가져오기
-                _itemName = _itemIdx[randomNumber];
-                //해당 키에 맞는 값(설명) 가져오기
-                _iteminfo = itemDic._KnightWeaponNames[_itemName];
+
+                if (_itemClass == PlayerType.Knight)
+                {
+                    //아이템 키 리스트 생성
+                    List<string> _itemIdx = new List<string>(itemDic._KnightWeaponNames.Keys);
+                    int randomNumber = _globalRandom.Next(0, _itemIdx.Count);
+                    //랜덤 인덱스에 해당하는 키(아이템 이름) 가져오기
+                    _itemName = _itemIdx[randomNumber];
+                    //해당 키에 맞는 값(설명) 가져오기
+
+                    _iteminfo = itemDic._KnightWeaponNames[_itemName];
+                }
+                else if (_itemClass == PlayerType.Archer)
+                {
+                    List<string> _itemIdx = new List<string>(itemDic._ArcherWeaponNames.Keys);
+                    int randomNumber = _globalRandom.Next(0, _itemIdx.Count);
+                    _itemName = _itemIdx[randomNumber];
+                    _iteminfo = itemDic._ArcherWeaponNames[_itemName];
+                }
+                else if (_itemClass == PlayerType.Mage)
+                {
+                    List<string> _itemIdx = new List<string>(itemDic._MageWeaponNames.Keys);
+                    int randomNumber = _globalRandom.Next(0, _itemIdx.Count);
+                    _itemName = _itemIdx[randomNumber];
+                    _iteminfo = itemDic._MageWeaponNames[_itemName];
+                }
             }
-            else if (_itemClass == PlayerType.Archer)
+
+            else if(equipmentType == EquipmentType.Armor)
             {
-                //아이템 키 리스트 생성
-                List<string> _itemIdx = new List<string>(itemDic._ArcherWeaponNames.Keys);
-                int randomNumber = _globalRandom.Next(0, _itemIdx.Count);
-                //랜덤 인덱스에 해당하는 키(아이템 이름) 가져오기
-                _itemName = _itemIdx[randomNumber];
-                //해당 키에 맞는 값(설명) 가져오기
-                _iteminfo = itemDic._ArcherWeaponNames[_itemName];
-            }
-            else if (_itemClass == PlayerType.Mage)
-            {
-                //아이템 키 리스트 생성
-                List<string> _itemIdx = new List<string>(itemDic._MageWeaponNames.Keys);
-                int randomNumber = _globalRandom.Next(0, _itemIdx.Count);
-                //랜덤 인덱스에 해당하는 키(아이템 이름) 가져오기
-                _itemName = _itemIdx[randomNumber];
-                //해당 키에 맞는 값(설명) 가져오기
-                _iteminfo = itemDic._MageWeaponNames[_itemName];
+                if (_itemClass == PlayerType.Knight)
+                {
+                    //아이템 키 리스트 생성
+                    List<string> _itemIdx = new List<string>(itemDic._KnightArmorNames.Keys);
+                    int randomNumber = _globalRandom.Next(0, _itemIdx.Count);
+                    //랜덤 인덱스에 해당하는 키(아이템 이름) 가져오기
+                    _itemName = _itemIdx[randomNumber];
+                    //해당 키에 맞는 값(설명) 가져오기
+
+                    _iteminfo = itemDic._KnightArmorNames[_itemName];
+                }
+                else if (_itemClass == PlayerType.Archer)
+                {
+                    List<string> _itemIdx = new List<string>(itemDic._ArcherArmorNames.Keys);
+                    int randomNumber = _globalRandom.Next(0, _itemIdx.Count);
+                    _itemName = _itemIdx[randomNumber];
+                    _iteminfo = itemDic._ArcherArmorNames[_itemName];
+                }
+                else if (_itemClass == PlayerType.Mage)
+                {
+                    List<string> _itemIdx = new List<string>(itemDic._MageArmorNames.Keys);
+                    int randomNumber = _globalRandom.Next(0, _itemIdx.Count);
+                    _itemName = _itemIdx[randomNumber];
+                    _iteminfo = itemDic._MageArmorNames[_itemName];
+                }
             }
 
         }
-
         public virtual void PrintRarity()
         {
             switch (_rarity)
@@ -125,9 +151,7 @@ namespace TextRpg
                     break;
             }
         }
-
     }
-
 
     class Weapon : EquipmentItem
     {
@@ -156,10 +180,11 @@ namespace TextRpg
             Console.Write("-");
             if (_Isequip)
             {
+                Console.ForegroundColor = ConsoleColor.Blue;
                 Console.Write("[E] ");
             }
             Console.Write($"{_itemName}  | 공격력 + {_damage}  | {_iteminfo} ");
-
+            Console.ResetColor();
         }
 
         public void SetDamage(int damage)
@@ -214,11 +239,11 @@ namespace TextRpg
             Console.Write("-");
             if (_Isequip)
             {
+                Console.ForegroundColor = ConsoleColor.Blue;
                 Console.Write("[E] ");
             }
             Console.Write($"{_itemName}  | 방어력 + {_defence}  | {_iteminfo} ");
+            Console.ResetColor();
         }
-
-
     }
 }
