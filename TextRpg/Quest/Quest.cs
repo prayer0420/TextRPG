@@ -79,7 +79,7 @@ namespace TextRpg
             Console.WriteLine(Description);
             foreach (var objective in Objectives)
             {
-                Console.WriteLine($"- {objective.Key} ({Progress[objective.Key]} / {Objectives[objective.Key]}");
+                Console.WriteLine($"- {objective.Key} ({Progress[objective.Key]} / {Objectives[objective.Key]})");
             }
             Console.WriteLine(Status == QuestStatus.Completed ? "퀘스트 완료됨!" : "진행 중");
         }

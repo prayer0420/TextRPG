@@ -130,6 +130,14 @@ namespace TextRpg
                     PlayerTurn();
                     break;
             }
+
+            //Console.WriteLine("\n0.계속하기\n>> ");
+            //int choice2 = int.Parse(Console.ReadLine());
+            //if (choice2 == 0)
+            //{
+            //    MonsterTurn();
+            //}
+
         }
 
         private void Attack()
@@ -140,7 +148,7 @@ namespace TextRpg
             ShowBattleStatus();
 
             Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine("\n [전투 중!] ");
+            Console.WriteLine("\n[전투 중!] ");
             Console.ResetColor();
 
             Console.ForegroundColor = ConsoleColor.Green;
@@ -213,12 +221,21 @@ namespace TextRpg
                         //questManager.UpdateQuestProgress("마왕 처치", 1);
                     }
                 }
+                
+                Console.WriteLine("0. 다음");
+                string input = Console.ReadLine();
+                if(input == "0")
+                {
+                    return;
+                }
+                
             }
             else
             {
                 Console.WriteLine("잘못된 선택입니다.");
                 Attack();
             }
+
         }
 
         private void UseSkill()
@@ -226,7 +243,7 @@ namespace TextRpg
             Console.Clear();
 
             Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine("[전투 중!] ");
+            Console.WriteLine("[전투 중!]");
             Console.ResetColor();
 
             ShowBattleStatus();
@@ -334,7 +351,7 @@ namespace TextRpg
             {
                 if (!monster.isDead())
                 {
-                    String PlayerName = Game.GetInstance().PlayerName;
+                    string PlayerName = Game.GetInstance().PlayerName;
                     int damage = monster.CalculateDamage();
                     bool isEvaded = globalrandom.NextDouble() < player.EvasionChance;
 
@@ -348,7 +365,7 @@ namespace TextRpg
                         player.OnDamaged(damage - player.Def);
                         Console.WriteLine($"{monster.Name}의 공격!");
                         Console.WriteLine($"{PlayerName}에게 {damage}의 피해를 입었습니다.");
-                        Console.WriteLine($"{PlayerName} HP {player.Hp}/{player.Mp}");
+                        Console.WriteLine($"{PlayerName}HP {player.Hp}/{player.MaxHp}");
                         if (player.isDead())
                         {
                             Console.WriteLine($"player.isDead()이(가) 쓰러졌습니다.");
@@ -356,11 +373,10 @@ namespace TextRpg
                         }
                     }
                 }
-                Console.WriteLine(" 0. 다음");
+                Console.WriteLine("\n\n0. 다음");
                 string input = Console.ReadLine();
-                if(input == "0")
+                if (input == "0")
                 {
-                    IsEscape = true;
                     return;
                 }
             }
@@ -372,6 +388,10 @@ namespace TextRpg
 
             Console.Clear();
 
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine("[전투 상황]");
+            Console.ResetColor();
+
             Console.WriteLine("\n[몬스터 상태]");
             for (int i = 0; i < monsters.Count; i++)
             {
@@ -379,7 +399,7 @@ namespace TextRpg
                 //죽지않았으면
                 if (!monster.isDead())
                 {
-                    Console.WriteLine($"{monster.Name}  HP {monster.Hp}");
+                    Console.WriteLine($"{monster.Name}  HP {monster.Hp} / {monster.MaxHp}");
                 }
                 //죽었으면 
                 else
@@ -391,8 +411,8 @@ namespace TextRpg
             }
             Console.WriteLine($"\n[플레이어 상태]");
             Console.WriteLine($"Lv.{player.Level} {Game.GetInstance().PlayerName} ({player.GetPlayerType()})");
-            Console.WriteLine($"HP {player.Hp}/{player.InitHp}");
-            Console.WriteLine($"MP {player.Mp}/{player.InitMp}\n");
+            Console.WriteLine($"HP {player.Hp}/{player.MaxHp}");
+            Console.WriteLine($"MP {player.Mp}/{player.MaxMp}\n");
         }
 
         private void Escape()

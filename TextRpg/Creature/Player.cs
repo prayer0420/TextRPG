@@ -59,6 +59,7 @@ namespace TextRpg
             InitHp = hp;
             MaxHp = hp;
             Hp = hp;
+            Mp = mp;
             InitMp = mp;
             MaxMp = mp;
             Level = level;
@@ -182,6 +183,7 @@ namespace TextRpg
             Console.WriteLine($"공격력 : {Atk + ItemAtk}  (+{ItemAtk})");
             Console.WriteLine($"방어력 : {Def + _itemDef}  (+{_itemDef})");
             Console.WriteLine($"체력 : {GetHp()}");
+            Console.WriteLine($"마력 : {Mp}");
             Console.WriteLine($"골드 : {Gold}");
 
             Console.WriteLine();
@@ -210,7 +212,6 @@ namespace TextRpg
         }
         public override void Initialize()
         {
-            base.Initialize();
             SetInfo(10, 10, 90, 100, 1);  //공격력 10, 방어력 10, 체력 90으로 초기화
         }
     }
@@ -223,6 +224,8 @@ namespace TextRpg
         }
         public override void Initialize()
         {
+            base.Initialize();
+
             SetInfo(13, 7, 90, 120, 1);  //공격력 10, 방어력 10, 체력 90으로 초기화
         }
         public override void LevelUp()
@@ -240,6 +243,7 @@ namespace TextRpg
 
         public override void Initialize()
         {
+            base.Initialize();
             SetInfo(15, 5, 90, 150, 1);  //공격력 10, 방어력 10, 체력 90으로 초기화
         }
 

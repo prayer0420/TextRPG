@@ -100,6 +100,7 @@ namespace TextRpg
             if (!LoadGameData())
             {
                 mode = GameMode.Lobby;
+
                 //처음 시작한거라면 시간 초기셋팅
                 TotalPlayTime = TimeSpan.Zero;
                 stopwatch= new Stopwatch();
@@ -217,7 +218,6 @@ namespace TextRpg
                     break;
                 //퀘스트 의뢰소 가기
                 case "5":
-                    AddQuests();
                     ProcessQuest(player);
                     break;
                 case "6":
@@ -262,97 +262,7 @@ namespace TextRpg
             }
         }
 
-        private void AddQuests()
-        {
-            Console.Clear();
 
-            // 독립적인 퀘스트 1
-            Quest quest1 = new Quest
-            (
-                "마을을 위협하는 미니언 처치",
-                "마을 주민:\n이봐요! 마을 근처에 몬스터들이 너무 많아졌어요.\n마을의 안전을 위해 몬스터 5마리를 처치해 주세요!",
-                new Dictionary<string, int> { { "몬스터 처치", 5 } },
-                new List<Item> { new EquipmentItem(EquipmentType.Weapon) },
-                100,
-                QuestStatus.NotStarted,
-                1 // 필요한 최소 레벨
-            );
-
-            // 독립적인 퀘스트 2
-            Quest quest2 = new Quest
-                (
-                "잃어버린 반지 찾기",
-                "노부인:\n젊은이, 내 소중한 반지를 잃어버렸어요. 숲 속 어딘가에 있을 텐데, 찾아주겠나요?",
-                new Dictionary<string, int> { { "반지 찾기", 1 } },
-                new List<Item> { new ConsumableItem(ConsumalbeType.HpPortion) },
-                50,
-                QuestStatus.NotStarted,
-                1
-            );
-
-            // 독립적인 퀘스트 3 (연계 퀘스트의 시작)
-            Quest quest3 = new Quest
-                (
-                "숲 속의 이상한 소문 조사",
-                "마을 장로:\n최근 숲 속에서 이상한 일이 일어나고 있다는 소문이 있어요. 확인해 주실 수 있나요?",
-                new Dictionary<string, int> { { "숲 조사", 1 } },
-                new List<Item> { new EquipmentItem(EquipmentType.Armor) },
-                150,
-                QuestStatus.NotStarted,
-                2
-            );
-
-            // 연계 퀘스트 1
-            Quest quest4 = new Quest
-                (
-                "숲 속의 고블린 퇴치",
-                "숲 속에서 고블린이 나타났습니다! 마을을 지키기 위해 고블린 3마리를 처치해 주세요.",
-                new Dictionary<string, int> { { "고블린 처치", 3 } },
-                new List<Item> { new EquipmentItem(EquipmentType.Weapon) },
-                200,
-                QuestStatus.NotStarted,
-                3
-            );
-
-            // 연계 퀘스트 2
-            Quest quest5 = new Quest
-                (
-                "고블린 두목의 정체",
-                "마을 장로:\n고블린들의 배후에 누군가 있는 것 같아요. 고블린 두목을 찾아 처치해 주세요.",
-                new Dictionary<string, int> { { "고블린 두목 처치", 1 } },
-                new List<Item> { new EquipmentItem(EquipmentType.Armor) },
-                300,
-                QuestStatus.NotStarted,
-                4
-            );
-
-            // 최종 퀘스트
-            Quest quest6 = new Quest
-                (
-                "마왕 토벌",
-                "마을 장로:\n모든 문제의 원흉인 마왕이 모습을 드러냈습니다. 마왕을 처치하고 세계를 구해주세요!",
-                new Dictionary<string, int> { { "마왕 처치", 1 } },
-                new List<Item> { new EquipmentItem(EquipmentType.Weapon) },
-                1000,
-                QuestStatus.NotStarted,
-                5
-            );
-
-            // 퀘스트 간의 연계 설정
-            quest4.RequiredQuest = quest3; // 퀘스트 3을 완료해야 퀘스트 4 진행 가능
-            quest5.RequiredQuest = quest4; 
-            quest6.RequiredQuest = quest5; 
-
-            QuestManager questManager = QuestManager.GetInstance();
-
-            // 퀘스트 매니저에 퀘스트 추가
-            questManager.AddQuest(quest1);
-            questManager.AddQuest(quest2);
-            questManager.AddQuest(quest3);
-            questManager.AddQuest(quest4);
-            questManager.AddQuest(quest5);
-            questManager.AddQuest(quest6);
-        }
         
         public void ProcessDungeon(Player _player)
         {
@@ -369,24 +279,36 @@ namespace TextRpg
             Console.WriteLine($"던전 {dungeonLevel}층으로 이동합니다...");
             List<Monster> monsters = GenerateMonsters();
             Battle battle = new Battle(_player, monsters);
-            battle.Start();
+
 
             if (!player.isDead())
             {
-                dungeonLevel++;
-                player.RecoveryMp(10);
-                Console.WriteLine("MP가 10 회복되었습니다.");
+                //dungeonLevel;
+                //player.RecoveryMp(10);
+                //Console.WriteLine("MP가 10 회복되었습니다.");
             }
             else
             {
                 Console.WriteLine("마을로 돌아갑니다.");
-                dungeonLevel = 1;
+                ProcessTown();
             }
 
-            Console.WriteLine("0. 나가기\n");
-
+            Console.WriteLine($"1.{dungeonLevel}층 입장");
+            Console.WriteLine($"0.나가기");
+            
             Console.WriteLine("원하시는 행동을 입력해주세요");
-            string input = Console.ReadLine();
+
+            int number = int.Parse(Console.ReadLine());
+            
+            if(number ==0)
+            {
+                ProcessTown();
+            }
+            else if(number ==1)
+            {
+                battle.Start();
+            }
+
 
         }
 
@@ -405,7 +327,7 @@ namespace TextRpg
                     case 1:
                         monster = new Slime();
                         monster.GenerateMonster(
-                            $"Lv.{2 * dungeonLevel} 미니언",
+                            $"Lv.{2 * dungeonLevel} 슬라임",
                             2 * dungeonLevel,
                             15 + (dungeonLevel * 5),
                             5 + (dungeonLevel * 2),
